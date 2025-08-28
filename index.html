@@ -8,8 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- FFmpeg.js for video/audio conversion -->
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
-    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/index.js"></script>
     
     <style>
         * {
@@ -165,6 +166,7 @@
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="glass-effect fixed w-full top-0 z-50 px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-4">
@@ -191,8 +193,10 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <div class="pt-24 px-6 min-h-screen">
         <div class="max-w-7xl mx-auto">
+            <!-- Hero Section -->
             <div class="text-center mb-12">
                 <h2 class="text-4xl md:text-6xl font-bold text-white mb-4">
                     Client-Side Media <span class="text-yellow-300">Conversion</span>
@@ -201,6 +205,7 @@
                     Professional-grade media conversion running entirely in your browser with zero server dependency
                 </p>
 
+                <!-- Metrics Dashboard -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div class="glass-effect rounded-xl p-4 text-white">
                         <div class="text-2xl font-bold" id="totalConversions">0</div>
@@ -221,13 +226,16 @@
                 </div>
             </div>
 
+            <!-- Main Conversion Interface -->
             <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Upload Section -->
                 <div class="lg:col-span-2">
                     <div class="glass-card p-8 rounded-2xl">
                         <h3 class="text-2xl font-bold gradient-text mb-6">
                             <i class="fas fa-cloud-upload-alt mr-3"></i>Upload & Convert
                         </h3>
 
+                        <!-- FFmpeg Loading Status -->
                         <div id="ffmpegLoading" class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                             <div class="flex items-center">
                                 <div class="loading-spinner"></div>
@@ -235,6 +243,7 @@
                             </div>
                         </div>
 
+                        <!-- Drag & Drop Zone -->
                         <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all duration-300 hover:border-blue-400 cursor-pointer opacity-50">
                             <div class="floating-animation">
                                 <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
@@ -247,8 +256,10 @@
                             </button>
                         </div>
 
+                        <!-- File List -->
                         <div id="fileList" class="mt-6 space-y-4"></div>
 
+                        <!-- Conversion Options -->
                         <div id="conversionOptions" class="mt-6 hidden">
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
@@ -283,12 +294,14 @@
                     </div>
                 </div>
 
+                <!-- Supported Formats -->
                 <div>
                     <div class="glass-card p-6 rounded-2xl">
                         <h3 class="text-xl font-bold gradient-text mb-6">
                             <i class="fas fa-list mr-2"></i>Supported Formats
                         </h3>
 
+                        <!-- Format Categories -->
                         <div class="space-y-6">
                             <div>
                                 <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
@@ -311,7 +324,7 @@
                                 <div class="flex flex-wrap gap-1">
                                     <span class="format-badge">MP3</span>
                                     <span class="format-badge">WAV</span>
-                                    <span class="format-badge">AAC</span>
+                                                                        <span class="format-badge">AAC</span>
                                     <span class="format-badge">OGG</span>
                                     <span class="format-badge">M4A</span>
                                     <span class="format-badge">FLAC</span>
@@ -333,6 +346,7 @@
                             </div>
                         </div>
 
+                        <!-- Quick Stats -->
                         <div class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
                             <h4 class="font-semibold text-gray-700 mb-3">Features</h4>
                             <div class="space-y-2 text-sm">
@@ -354,6 +368,7 @@
                 </div>
             </div>
 
+            <!-- Conversion Progress Modal -->
             <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
                 <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
                     <div class="text-center">
@@ -388,6 +403,7 @@
         </div>
     </div>
 
+    <!-- Success Notification -->
     <div id="notification" class="notification">
         <div class="bg-green-500 text-white p-4 rounded-lg shadow-lg">
             <div class="flex items-center">
@@ -403,6 +419,7 @@
         </div>
     </div>
 
+    <!-- Footer -->
     <footer class="mt-20 pb-8 text-center text-white/60">
         <div class="max-w-4xl mx-auto px-6">
             <div class="flex flex-col md:flex-row items-center justify-between">
@@ -526,10 +543,9 @@
                         // Default conversion
                         ffmpegArgs = ['-i', inputFileName, outputFileName];
                     }
-                    
-                    // ***FIX 3: Use ffmpeg.run() instead of the deprecated ffmpeg.exec()***
+
                     // Execute FFmpeg conversion
-                    await ffmpeg.run(...ffmpegArgs);
+                    await ffmpeg.exec(ffmpegArgs);
 
                     // Read the output file
                     const data = await ffmpeg.readFile(outputFileName);
@@ -542,7 +558,7 @@
 
                 } catch (error) {
                     console.error('FFmpeg conversion error:', error);
-                    throw new Error(`Conversion failed: ${error.message || 'Unknown FFmpeg error'}`);
+                    throw new Error(`Conversion failed: ${error.message}`);
                 }
             }
 
@@ -554,9 +570,8 @@
         // Initialize FFmpeg
         async function initializeFFmpeg() {
             try {
-                // ***FIX 1: Use window.FFmpeg and window.FFmpegUtil to access the loaded scripts***
-                const { FFmpeg } = window.FFmpeg;
-                const { toBlobURL } = window.FFmpegUtil;
+                const { FFmpeg } = FFmpegWASM;
+                const { toBlobURL } = FFmpegUtil;
 
                 ffmpeg = new FFmpeg();
 
@@ -568,8 +583,7 @@
                 });
 
                 // Load FFmpeg
-                // ***FIX 2: Update the core URL to a version compatible with the main library***
-                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
                 await ffmpeg.load({
                     coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
                     wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
@@ -641,7 +655,7 @@
             document.querySelectorAll('.quality-option').forEach(option => {
                 option.addEventListener('click', function() {
                     document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('selected'));
-                    this.classList.add('selected');
+                                    this.classList.add('selected');
                 });
             });
         }
@@ -669,12 +683,11 @@
         }
 
         function processSelectedFiles(files) {
-            selectedFiles = [...selectedFiles, ...files]; // Append new files
-            displayFileList(selectedFiles);
-            updateOutputFormats(selectedFiles);
+            selectedFiles = files;
+            displayFileList(files);
+            updateOutputFormats(files);
             showConversionOptions();
         }
-
 
         function displayFileList(files) {
             const fileList = document.getElementById('fileList');
@@ -784,9 +797,7 @@
         }
 
         function showConversionOptions() {
-            if (selectedFiles.length > 0) {
-                document.getElementById('conversionOptions').classList.remove('hidden');
-            }
+            document.getElementById('conversionOptions').classList.remove('hidden');
         }
 
         function removeFile(index) {
@@ -814,15 +825,75 @@
                 showErrorNotification('Please select files to convert');
                 return;
             }
-            
-            startBatchConversion();
+
+            // Process first file (can be extended for batch processing)
+            const file = selectedFiles[0];
+            const fileType = getFileType(file.name);
+
+            try {
+                conversionStats.activeJobs++;
+                updateStats();
+
+                showProgressModal();
+                document.getElementById('currentFileName').textContent = file.name;
+                document.getElementById('currentFormat').textContent = outputFormat.toUpperCase();
+
+                currentConversionProcess = true;
+
+                const converter = new ClientMediaConverter();
+                let convertedBlob;
+
+                updateProgressDisplay({ progress: 10 });
+
+                if (fileType === 'image') {
+                    convertedBlob = await converter.convertImage(file, outputFormat, 0.9);
+                } else if (fileType === 'video' || fileType === 'audio') {
+                    if (!isFFmpegLoaded) {
+                        throw new Error('Video/Audio conversion engine not available');
+                    }
+                    convertedBlob = await converter.convertVideoAudio(file, outputFormat, selectedQuality);
+                } else {
+                    throw new Error('Unsupported file type');
+                }
+
+                updateProgressDisplay({ progress: 100 });
+
+                // Create download link
+                const downloadUrl = URL.createObjectURL(convertedBlob);
+                const originalName = file.name.split('.').slice(0, -1).join('.');
+                const downloadName = `${originalName}.${outputFormat}`;
+
+                setTimeout(() => {
+                    hideProgressModal();
+                    showSuccessNotification(downloadName, downloadUrl);
+                    resetForm();
+                    
+                    conversionStats.totalConversions++;
+                    conversionStats.activeJobs--;
+                    updateStats();
+                    
+                    currentConversionProcess = null;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Conversion error:', error);
+                hideProgressModal();
+                showErrorNotification(error.message);
+                
+                conversionStats.activeJobs--;
+                updateStats();
+                currentConversionProcess = null;
+            }
         }
 
         function cancelConversion() {
-            // FFmpeg.wasm v0.12 doesn't have a direct abort/cancel method exposed after execution starts.
-            // This reloads the page as a hard stop. A more graceful solution would require a different library version or architecture.
-            showErrorNotification('Conversion cancelled by user. Reloading...');
-            setTimeout(() => location.reload(), 1500);
+            if (currentConversionProcess) {
+                currentConversionProcess = null;
+                conversionStats.activeJobs--;
+                updateStats();
+            }
+            hideProgressModal();
+            showErrorNotification('Conversion cancelled');
         }
 
         function updateProgressDisplay(status) {
@@ -842,11 +913,11 @@
 
             // Update status message
             if (progress < 25) {
-                progressStatus.textContent = 'Preparing files...';
+                progressStatus.textContent = 'Initializing conversion...';
             } else if (progress < 50) {
-                progressStatus.textContent = 'Processing data...';
+                progressStatus.textContent = 'Processing file...';
             } else if (progress < 75) {
-                progressStatus.textContent = 'Applying codecs...';
+                progressStatus.textContent = 'Converting format...';
             } else if (progress < 100) {
                 progressStatus.textContent = 'Finalizing output...';
             } else {
@@ -864,18 +935,21 @@
             document.body.style.overflow = 'auto';
         }
 
-        function showSuccessNotification(message, downloadUrl) {
+        function showSuccessNotification(filename, downloadUrl) {
             const notification = document.getElementById('notification');
             const notificationContent = notification.querySelector('div');
 
-            notificationContent.className = 'bg-green-500 text-white p-4 rounded-lg shadow-lg';
             notificationContent.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <i class="fas fa-check-circle text-xl mr-3"></i>
                         <div>
-                            <div class="font-semibold">Success!</div>
-                            <div class="text-sm opacity-90">${message}</div>
+                            <div class="font-semibold">Conversion Complete!</div>
+                            <div class="text-sm opacity-90">
+                                <a href="${downloadUrl}" class="underline hover:no-underline" download="${filename}">
+                                    Download ${filename}
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">
@@ -883,22 +957,22 @@
                     </button>
                 </div>
             `;
-            
+
             notification.classList.add('show');
-            
-            if (downloadUrl && downloadUrl !== '#') {
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = message.split(' ')[0]; // Basic filename extraction
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
-            }
 
-            setTimeout(hideNotification, 5000);
+            // Auto-download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setTimeout(() => {
+                hideNotification();
+                URL.revokeObjectURL(downloadUrl);
+            }, 10000);
         }
-
 
         function showErrorNotification(message) {
             const notification = document.getElementById('notification');
@@ -909,7 +983,7 @@
                 <div class="flex items-center">
                     <i class="fas fa-exclamation-circle text-xl mr-3"></i>
                     <div>
-                        <div class="font-semibold">Conversion Error</div>
+                        <div class="font-semibold">Conversion Failed</div>
                         <div class="text-sm opacity-90">${message}</div>
                     </div>
                     <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">
@@ -928,6 +1002,12 @@
         function hideNotification() {
             const notification = document.getElementById('notification');
             notification.classList.remove('show');
+
+            // Reset to success styling
+            setTimeout(() => {
+                const notificationContent = notification.querySelector('div');
+                notificationContent.className = 'bg-green-500 text-white p-4 rounded-lg shadow-lg';
+            }, 300);
         }
 
         function resetForm() {
@@ -957,66 +1037,1595 @@
             document.getElementById('totalConversions').textContent = conversionStats.totalConversions.toLocaleString();
             document.getElementById('activeJobs').textContent = conversionStats.activeJobs;
         }
-        
-        async function startBatchConversion() {
-            const outputFormat = document.getElementById('outputFormat').value;
-            const selectedQuality = document.querySelector('.quality-option.selected').dataset.quality;
 
-            if (!outputFormat || selectedFiles.length === 0) return;
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Escape key to close modals
+            if (event.key === 'Escape') {
+                hideProgressModal();
+                hideNotification();
+            }
 
-            conversionStats.activeJobs += selectedFiles.length;
-            updateStats();
+            // Ctrl/Cmd + U to upload files
+            if ((event.ctrlKey || event.metaKey) && event.key === 'u') {
+                event.preventDefault();
+                if (!document.getElementById('fileInput').disabled) {
+                    document.getElementById('fileInput').click();
+                }
+            }
+        });
 
-            const filesToConvert = [...selectedFiles];
-            resetForm(); // Clear the UI for the next batch
+        // Prevent page refresh on file drag
+        window.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        }, false);
 
-            for (let i = 0; i < filesToConvert.length; i++) {
-                const file = filesToConvert[i];
-                const fileType = getFileType(file.name);
-                
-                showProgressModal();
-                document.getElementById('currentFileName').textContent = file.name;
-                document.getElementById('currentFormat').textContent = `${outputFormat.toUpperCase()} (${i + 1}/${filesToConvert.length})`;
-                updateProgressDisplay({ progress: 0 });
+        window.addEventListener('drop', function(e) {
+            e.preventDefault();
+        }, false);
 
-                currentConversionProcess = true;
+        // Service Worker for offline functionality (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('data:text/javascript,console.log("MediaForge Pro SW")').then(function(registration) {
+                    console.log('SW registered: ', registration);
+                }).catch(function(registrationError) {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        // Performance monitoring
+        function logPerformance(operation, startTime) {
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+            console.log(`${operation} took ${duration.toFixed(2)} milliseconds`);
+        }
+
+        // Memory cleanup
+        function cleanupMemory() {
+            // Clean up any object URLs that might be lingering
+            const links = document.querySelectorAll('a[href^="blob:"]');
+            links.forEach(link => {
+                URL.revokeObjectURL(link.href);
+            });
+        }
+
+        // Clean up memory every 5 minutes
+        setInterval(cleanupMemory, 5 * 60 * 1000);
+
+                // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, pause any ongoing operations if needed
+                console.log('Page hidden - pausing operations');
+            } else {
+                // Page is visible again, resume operations
+                console.log('Page visible - resuming operations');
+                updateStats();
+            }
+        });
+
+        // Error boundary for unhandled errors
+        window.addEventListener('error', function(event) {
+            console.error('Global error:', event.error);
+            showErrorNotification('An unexpected error occurred. Please try again.');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showErrorNotification('An unexpected error occurred during processing.');
+            event.preventDefault();
+        });
+
+        // Browser compatibility checks
+        function checkBrowserCompatibility() {
+            const features = {
+                webAssembly: typeof WebAssembly !== 'undefined',
+                fileAPI: typeof File !== 'undefined' && typeof FileReader !== 'undefined',
+                canvas: !!document.createElement('canvas').getContext,
+                dragDrop: 'draggable' in document.createElement('div'),
+                localStorage: typeof Storage !== 'undefined'
+            };
+
+            const unsupportedFeatures = Object.entries(features)
+                .filter(([feature, supported]) => !supported)
+                .map(([feature]) => feature);
+
+            if (unsupportedFeatures.length > 0) {
+                console.warn('Unsupported features:', unsupportedFeatures);
+                showErrorNotification(`Your browser doesn't support some features: ${unsupportedFeatures.join(', ')}`);
+            }
+
+            return unsupportedFeatures.length === 0;
+        }
+
+        // Initialize browser compatibility check
+        checkBrowserCompatibility();
+
+        // Advanced image processing functions
+        class AdvancedImageProcessor {
+            constructor() {
+                this.canvas = document.createElement('canvas');
+                this.ctx = this.canvas.getContext('2d');
+            }
+
+            async resizeImage(file, width, height, maintainAspectRatio = true) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let newWidth = width;
+                        let newHeight = height;
+
+                        if (maintainAspectRatio) {
+                            const aspectRatio = img.width / img.height;
+                            if (width / height > aspectRatio) {
+                                newWidth = height * aspectRatio;
+                            } else {
+                                newHeight = width / aspectRatio;
+                            }
+                        }
+
+                        this.canvas.width = newWidth;
+                        this.canvas.height = newHeight;
+                        this.ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                        this.canvas.toBlob(resolve, 'image/png');
+                    };
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+
+            async applyFilter(file, filterType) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.canvas.width = img.width;
+                        this.canvas.height = img.height;
+                        this.ctx.drawImage(img, 0, 0);
+
+                        const imageData = this.ctx.getImageData(0, 0, img.width, img.height);
+                        const data = imageData.data;
+
+                        switch (filterType) {
+                            case 'grayscale':
+                                for (let i = 0; i < data.length; i += 4) {
+                                    const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                                    data[i] = gray;
+                                    data[i + 1] = gray;
+                                    data[i + 2] = gray;
+                                }
+                                break;
+                            case 'sepia':
+                                for (let i = 0; i < data.length; i += 4) {
+                                    const r = data[i];
+                                    const g = data[i + 1];
+                                    const b = data[i + 2];
+                                    data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                                    data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                                    data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                                }
+                                break;
+                            case 'invert':
+                                for (let i = 0; i < data.length; i += 4) {
+                                    data[i] = 255 - data[i];
+                                    data[i + 1] = 255 - data[i + 1];
+                                    data[i + 2] = 255 - data[i + 2];
+                                }
+                                break;
+                        }
+
+                        this.ctx.putImageData(imageData, 0, 0);
+                        this.canvas.toBlob(resolve, 'image/png');
+                    };
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+        }
+
+        // Batch processing functionality
+        class BatchProcessor {
+            constructor() {
+                this.queue = [];
+                this.processing = false;
+                this.maxConcurrent = 2;
+                this.currentJobs = 0;
+            }
+
+            addToQueue(file, outputFormat, quality, options = {}) {
+                const job = {
+                    id: Date.now() + Math.random(),
+                    file,
+                    outputFormat,
+                    quality,
+                    options,
+                    status: 'queued'
+                };
+                this.queue.push(job);
+                return job.id;
+            }
+
+            async processQueue() {
+                if (this.processing) return;
+                this.processing = true;
+
+                while (this.queue.length > 0 && this.currentJobs < this.maxConcurrent) {
+                    const job = this.queue.shift();
+                    this.processJob(job);
+                }
+
+                this.processing = false;
+            }
+
+            async processJob(job) {
+                this.currentJobs++;
+                job.status = 'processing';
 
                 try {
                     const converter = new ClientMediaConverter();
-                    let convertedBlob;
+                    const fileType = getFileType(job.file.name);
+                    let result;
 
                     if (fileType === 'image') {
-                        // Image conversion progress is not tracked by FFmpeg, so we simulate it
-                        updateProgressDisplay({ progress: 50 });
-                        convertedBlob = await converter.convertImage(file, outputFormat, 0.9);
-                        updateProgressDisplay({ progress: 100 });
+                        result = await converter.convertImage(job.file, job.outputFormat, 0.9);
+                    } else {
+                        result = await converter.convertVideoAudio(job.file, job.outputFormat, job.quality);
+                    }
+
+                    job.status = 'completed';
+                    job.result = result;
+                    this.onJobComplete(job);
+
+                } catch (error) {
+                    job.status = 'failed';
+                    job.error = error.message;
+                    this.onJobError(job);
+                }
+
+                this.currentJobs--;
+                
+                // Process next job if queue has items
+                if (this.queue.length > 0) {
+                    setTimeout(() => this.processQueue(), 100);
+                }
+            }
+
+            onJobComplete(job) {
+                console.log(`Job ${job.id} completed`);
+                // Create download for completed job
+                const downloadUrl = URL.createObjectURL(job.result);
+                const originalName = job.file.name.split('.').slice(0, -1).join('.');
+                const downloadName = `${originalName}.${job.outputFormat}`;
+                
+                // Auto-download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = downloadName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
+            }
+
+            onJobError(job) {
+                console.error(`Job ${job.id} failed:`, job.error);
+                showErrorNotification(`Failed to convert ${job.file.name}: ${job.error}`);
+            }
+        }
+
+        // Initialize batch processor
+        const batchProcessor = new BatchProcessor();
+
+        // Enhanced file validation
+        function validateFile(file) {
+            const maxSize = 2 * 1024 * 1024 * 1024; // 2GB limit for client-side processing
+            const allowedTypes = [
+                ...formatMappings.video.extensions,
+                ...formatMappings.audio.extensions,
+                ...formatMappings.image.extensions
+            ];
+
+            if (file.size > maxSize) {
+                throw new Error(`File too large. Maximum size is 2GB for client-side processing.`);
+            }
+
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!allowedTypes.includes(extension)) {
+                throw new Error(`Unsupported file type: ${extension}`);
+            }
+
+            return true;
+        }
+
+        // Enhanced drag and drop with file validation
+        function handleDropEnhanced(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+
+            const files = Array.from(event.dataTransfer.files);
+            const validFiles = [];
+            const errors = [];
+
+            files.forEach(file => {
+                try {
+                    validateFile(file);
+                    validFiles.push(file);
+                } catch (error) {
+                    errors.push(`${file.name}: ${error.message}`);
+                }
+            });
+
+            if (errors.length > 0) {
+                showErrorNotification(`Some files were rejected:\n${errors.join('\n')}`);
+            }
+
+            if (validFiles.length > 0) {
+                processSelectedFiles(validFiles);
+            }
+        }
+
+        // Local storage for user preferences
+        class UserPreferences {
+            constructor() {
+                this.storageKey = 'mediaforge-preferences';
+                this.defaults = {
+                    defaultQuality: 'high',
+                    autoDownload: true,
+                    showAdvancedOptions: false,
+                    theme: 'default'
+                };
+            }
+
+            load() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    return stored ? { ...this.defaults, ...JSON.parse(stored) } : this.defaults;
+                } catch (error) {
+                    console.error('Failed to load preferences:', error);
+                    return this.defaults;
+                }
+            }
+
+            save(preferences) {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(preferences));
+                } catch (error) {
+                    console.error('Failed to save preferences:', error);
+                }
+            }
+
+            get(key) {
+                const prefs = this.load();
+                return prefs[key];
+            }
+
+            set(key, value) {
+                const prefs = this.load();
+                prefs[key] = value;
+                this.save(prefs);
+            }
+        }
+
+        // Initialize user preferences
+        const userPrefs = new UserPreferences();
+
+        // Apply user preferences on load
+        function applyUserPreferences() {
+            const defaultQuality = userPrefs.get('defaultQuality');
+            const qualityOption = document.querySelector(`.quality-option[data-quality="${defaultQuality}"]`);
+            if (qualityOption) {
+                document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('selected'));
+                qualityOption.classList.add('selected');
+            }
+        }
+
+        // Save preferences when quality changes
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.quality-option')) {
+                const quality = event.target.closest('.quality-option').dataset.quality;
+                userPrefs.set('defaultQuality', quality);
+            }
+        });
+
+        // Enhanced conversion statistics
+        class ConversionAnalytics {
+            constructor() {
+                this.storageKey = 'mediaforge-analytics';
+            }
+
+            logConversion(fileType, inputFormat, outputFormat, fileSize, duration) {
+                const analytics = this.getAnalytics();
+                const conversion = {
+                    timestamp: Date.now(),
+                    fileType,
+                    inputFormat,
+                    outputFormat,
+                    fileSize,
+                    duration
+                };
+
+                analytics.conversions.push(conversion);
+                analytics.totalConversions++;
+                analytics.totalDataProcessed += fileSize;
+
+                // Keep only last 100 conversions
+                if (analytics.conversions.length > 100) {
+                    analytics.conversions = analytics.conversions.slice(-100);
+                }
+
+                this.saveAnalytics(analytics);
+            }
+
+            getAnalytics() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    return stored ? JSON.parse(stored) : {
+                        conversions: [],
+                        totalConversions: 0,
+                        totalDataProcessed: 0
+                    };
+                } catch (error) {
+                    return {
+                        conversions: [],
+                        totalConversions: 0,
+                        totalDataProcessed: 0
+                    };
+                }
+            }
+
+            saveAnalytics(analytics) {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(analytics));
+                } catch (error) {
+                    console.error('Failed to save analytics:', error);
+                }
+            }
+
+            getPopularFormats() {
+                const analytics = this.getAnalytics();
+                const formatCounts = {};
+
+                analytics.conversions.forEach(conv => {
+                    formatCounts[conv.outputFormat] = (formatCounts[conv.outputFormat] || 0) + 1;
+                });
+
+                return Object.entries(formatCounts)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5);
+            }
+        }
+
+        // Initialize analytics
+        const analytics = new ConversionAnalytics();
+
+        // Update stats display with analytics
+        function updateStatsWithAnalytics() {
+            const analyticsData = analytics.getAnalytics();
+            document.getElementById('totalConversions').textContent = analyticsData.totalConversions.toLocaleString();
+            document.getElementById('activeJobs').textContent = conversionStats.activeJobs;
+        }
+
+        // Apply preferences and update stats on load
+        setTimeout(() => {
+            applyUserPreferences();
+            updateStatsWithAnalytics();
+        }, 100);
+
+        // PWA functionality
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button or notification
+            showInstallPrompt();
+        });
+
+        function showInstallPrompt() {
+            const installNotification = document.createElement('div');
+            installNotification.className = 'fixed bottom-4 left-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg z-50';
+            installNotification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-download"></i>
+                    <div>
+                        <div class="font-semibold">Install MediaForge Pro</div>
+                        <div class="text-sm opacity-90">Add to your home screen for quick access</div>
+                    </div>
+                    <button onclick="installPWA()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold">
+                        Install
+                    </button>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>              `;
+            
+            document.body.appendChild(installNotification);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (installNotification.parentElement) {
+                    installNotification.remove();
+                }
+            }, 10000);
+        }
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('PWA installed');
+                    showSuccessNotification('MediaForge Pro installed successfully!', '#');
+                }
+                
+                deferredPrompt = null;
+                
+                // Remove install notification
+                const notification = document.querySelector('.fixed.bottom-4.left-4');
+                if (notification) {
+                    notification.remove();
+                }
+            }
+        }
+
+        // Advanced conversion options
+        function showAdvancedOptions() {
+            const advancedModal = document.createElement('div');
+            advancedModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            advancedModal.innerHTML = `
+                <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold gradient-text">Advanced Options</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Video Codec</label>
+                            <select id="videoCodec" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="libx264">H.264 (Recommended)</option>
+                                <option value="libx265">H.265 (HEVC)</option>
+                                <option value="libvpx-vp9">VP9</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Audio Bitrate</label>
+                            <select id="audioBitrate" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="128k">128 kbps</option>
+                                <option value="192k" selected>192 kbps</option>
+                                <option value="256k">256 kbps</option>
+                                <option value="320k">320 kbps</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Resolution</label>
+                            <select id="resolution" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="">Keep Original</option>
+                                <option value="1920x1080">1080p (1920x1080)</option>
+                                <option value="1280x720">720p (1280x720)</option>
+                                <option value="854x480">480p (854x480)</option>
+                                <option value="640x360">360p (640x360)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Frame Rate</label>
+                            <select id="frameRate" class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option value="">Keep Original</option>
+                                <option value="24">24 fps</option>
+                                <option value="30">30 fps</option>
+                                <option value="60">60 fps</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="fastStart" class="rounded">
+                            <label for="fastStart" class="text-sm text-gray-700">Enable fast start (web optimized)</label>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 mt-8">
+                        <button onclick="this.closest('.fixed').remove()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button onclick="applyAdvancedOptions()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-lg">
+                            Apply Settings
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(advancedModal);
+        }
+
+        function applyAdvancedOptions() {
+            const videoCodec = document.getElementById('videoCodec').value;
+            const audioBitrate = document.getElementById('audioBitrate').value;
+            const resolution = document.getElementById('resolution').value;
+            const frameRate = document.getElementById('frameRate').value;
+            const fastStart = document.getElementById('fastStart').checked;
+            
+            // Store advanced options for use in conversion
+            window.advancedOptions = {
+                videoCodec,
+                audioBitrate,
+                resolution,
+                frameRate,
+                fastStart
+            };
+            
+            document.querySelector('.fixed.inset-0').remove();
+            showSuccessNotification('Advanced options applied!', '#');
+        }
+
+        // Add advanced options button to conversion options
+        function addAdvancedOptionsButton() {
+            const conversionOptions = document.getElementById('conversionOptions');
+            const advancedBtn = document.createElement('button');
+            advancedBtn.type = 'button';
+            advancedBtn.className = 'mt-4 text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center';
+            advancedBtn.innerHTML = '<i class="fas fa-cog mr-2"></i>Advanced Options';
+            advancedBtn.onclick = showAdvancedOptions;
+            
+            const convertBtn = document.getElementById('convertBtn');
+            conversionOptions.insertBefore(advancedBtn, convertBtn);
+        }
+
+        // File format detection and metadata extraction
+        class FileAnalyzer {
+            static async getVideoMetadata(file) {
+                return new Promise((resolve, reject) => {
+                    const video = document.createElement('video');
+                    video.preload = 'metadata';
+                    
+                    video.onloadedmetadata = () => {
+                        resolve({
+                            duration: video.duration,
+                            width: video.videoWidth,
+                            height: video.videoHeight,
+                            aspectRatio: video.videoWidth / video.videoHeight
+                        });
+                        URL.revokeObjectURL(video.src);
+                    };
+                    
+                    video.onerror = () => {
+                        reject(new Error('Failed to load video metadata'));
+                        URL.revokeObjectURL(video.src);
+                    };
+                    
+                    video.src = URL.createObjectURL(file);
+                });
+            }
+            
+            static async getAudioMetadata(file) {
+                return new Promise((resolve, reject) => {
+                    const audio = document.createElement('audio');
+                    audio.preload = 'metadata';
+                    
+                    audio.onloadedmetadata = () => {
+                        resolve({
+                            duration: audio.duration
+                        });
+                        URL.revokeObjectURL(audio.src);
+                    };
+                    
+                    audio.onerror = () => {
+                        reject(new Error('Failed to load audio metadata'));
+                        URL.revokeObjectURL(audio.src);
+                    };
+                    
+                    audio.src = URL.createObjectURL(file);
+                });
+            }
+            
+            static async getImageMetadata(file) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        resolve({
+                            width: img.naturalWidth,
+                            height: img.naturalHeight,
+                            aspectRatio: img.naturalWidth / img.naturalHeight
+                        });
+                        URL.revokeObjectURL(img.src);
+                    };
+                    
+                    img.onerror = () => {
+                        reject(new Error('Failed to load image metadata'));
+                        URL.revokeObjectURL(img.src);
+                    };
+                    
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+        }
+
+        // Enhanced file item creation with metadata
+        async function createFileItemEnhanced(file, fileType, index) {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all';
+
+            const previewClass = `${fileType}-preview`;
+            const iconClass = fileType === 'video' ? 'fa-video' : fileType === 'audio' ? 'fa-music' : 'fa-image';
+
+            // Basic file info
+            let metadataHtml = '';
+            
+            try {
+                let metadata;
+                if (fileType === 'video') {
+                    metadata = await FileAnalyzer.getVideoMetadata(file);
+                    metadataHtml = `<div class="text-xs text-gray-400 mt-1">${Math.round(metadata.duration)}s • ${metadata.width}x${metadata.height}</div>`;
+                } else if (fileType === 'audio') {
+                    metadata = await FileAnalyzer.getAudioMetadata(file);
+                    metadataHtml = `<div class="text-xs text-gray-400 mt-1">${Math.round(metadata.duration)}s</div>`;
+                } else if (fileType === 'image') {
+                    metadata = await FileAnalyzer.getImageMetadata(file);
+                    metadataHtml = `<div class="text-xs text-gray-400 mt-1">${metadata.width}x${metadata.height}</div>`;
+                }
+            } catch (error) {
+                console.warn('Failed to get metadata for', file.name, error);
+            }
+
+            div.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="file-preview ${previewClass}">
+                        <i class="fas ${iconClass}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${file.name}</h4>
+                        <p class="text-sm text-gray-500">${formatFileSize(file.size)} • ${fileType.toUpperCase()}</p>
+                        ${metadataHtml}
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="previewFile(${index})" class="text-blue-500 hover:text-blue-700 p-2" title="Preview">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="removeFile(${index})" class="text-red-500 hover:text-red-700 p-2" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        // File preview functionality
+        function previewFile(index) {
+            const file = selectedFiles[index];
+            const fileType = getFileType(file.name);
+            
+            const previewModal = document.createElement('div');
+            previewModal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            
+            let previewContent = '';
+            const fileUrl = URL.createObjectURL(file);
+            
+            if (fileType === 'image') {
+                previewContent = `<img src="${fileUrl}" class="max-w-full max-h-full object-contain" alt="Preview">`;
+            } else if (fileType === 'video') {
+                previewContent = `<video src="${fileUrl}" controls class="max-w-full max-h-full" preload="metadata"></video>`;
+            } else if (fileType === 'audio') {
+                previewContent = `
+                    <div class="bg-white rounded-lg p-8 text-center">
+                        <i class="fas fa-music text-6xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">${file.name}</h3>
+                        <audio src="${fileUrl}" controls class="w-full"></audio>
+                    </div>
+                `;
+            }
+            
+            previewModal.innerHTML = `
+                <div class="relative max-w-4xl max-h-4xl w-full h-full flex items-center justify-center p-4">
+                    ${previewContent}
+                    <button onclick="this.closest('.fixed').remove(); URL.revokeObjectURL('${fileUrl}')" 
+                            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(previewModal);
+            
+            // Close on click outside
+            previewModal.addEventListener('click', (e) => {
+                if (e.target === previewModal) {
+                    previewModal.remove();
+                    URL.revokeObjectURL(fileUrl);
+                }
+            });
+        }
+
+        // Update displayFileList to use enhanced version
+        async function displayFileListEnhanced(files) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<div class="text-center text-gray-500">Loading file information...</div>';
+
+            const fileItems = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileType = getFileType(file.name);
+                const fileItem = await createFileItemEnhanced(file, fileType, i);
+                fileItems.push(fileItem);
+            }
+
+            fileList.innerHTML = '';
+            fileItems.forEach(item => fileList.appendChild(item));
+        }
+
+        // Conversion queue management
+        class ConversionQueue {
+            constructor() {
+                this.queue = [];
+                this.isProcessing = false;
+            }
+
+            add(file, outputFormat, quality, options = {}) {
+                const job = {
+                    id: Date.now() + Math.random(),
+                    file,
+                    outputFormat,
+                    quality,
+                    options,
+                    status: 'queued',
+                    progress: 0
+                };
+                
+                this.queue.push(job);
+                this.updateQueueDisplay();
+                return job.id;
+            }
+
+            async processNext() {
+                if (this.isProcessing || this.queue.length === 0) return;
+                
+                this.isProcessing = true;
+                const job = this.queue.find(j => j.status === 'queued');
+                
+                if (!job) {
+                    this.isProcessing = false;
+                    return;
+                }
+
+                try {
+                    job.status = 'processing';
+                    this.updateQueueDisplay();
+                    
+                    const startTime = performance.now();
+                    const converter = new ClientMediaConverter();
+                    const fileType = getFileType(job.file.name);                    let result;
+
+                    if (fileType === 'image') {
+                        result = await converter.convertImage(job.file, job.outputFormat, 0.9);
                     } else if (fileType === 'video' || fileType === 'audio') {
-                        if (!isFFmpegLoaded) throw new Error('Video/Audio conversion engine not available');
-                        convertedBlob = await converter.convertVideoAudio(file, outputFormat, selectedQuality);
+                        result = await converter.convertVideoAudio(job.file, job.outputFormat, job.quality);
                     } else {
                         throw new Error('Unsupported file type');
                     }
 
-                    const originalName = file.name.split('.').slice(0, -1).join('.');
-                    const downloadName = `${originalName}.${outputFormat}`;
-                    const downloadUrl = URL.createObjectURL(convertedBlob);
+                    const endTime = performance.now();
+                    const duration = endTime - startTime;
 
-                    showSuccessNotification(`${downloadName} converted!`, downloadUrl);
+                    job.status = 'completed';
+                    job.result = result;
+                    job.duration = duration;
                     
+                    // Log analytics
+                    const inputFormat = job.file.name.split('.').pop().toLowerCase();
+                    analytics.logConversion(fileType, inputFormat, job.outputFormat, job.file.size, duration);
+                    
+                    this.downloadResult(job);
+                    this.updateQueueDisplay();
+                    
+                    // Update stats
                     conversionStats.totalConversions++;
-                } catch (error) {
-                    console.error('Conversion error:', error);
-                    showErrorNotification(`Failed to convert ${file.name}: ${error.message}`);
-                } finally {
-                    currentConversionProcess = null;
-                    conversionStats.activeJobs--;
                     updateStats();
+
+                } catch (error) {
+                    job.status = 'failed';
+                    job.error = error.message;
+                    this.updateQueueDisplay();
+                    showErrorNotification(`Failed to convert ${job.file.name}: ${error.message}`);
+                }
+
+                this.isProcessing = false;
+                
+                // Process next job after a short delay
+                setTimeout(() => this.processNext(), 500);
+            }
+
+            downloadResult(job) {
+                const downloadUrl = URL.createObjectURL(job.result);
+                const originalName = job.file.name.split('.').slice(0, -1).join('.');
+                const downloadName = `${originalName}.${job.outputFormat}`;
+                
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = downloadName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up after 10 seconds
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
+                
+                showSuccessNotification(`${downloadName} downloaded successfully!`, downloadUrl);
+            }
+
+            updateQueueDisplay() {
+                const queueContainer = document.getElementById('queueDisplay');
+                if (!queueContainer) return;
+
+                if (this.queue.length === 0) {
+                    queueContainer.innerHTML = '<p class="text-gray-500 text-center">No files in queue</p>';
+                    return;
+                }
+
+                const queueHtml = this.queue.map(job => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm">${job.file.name}</div>
+                            <div class="text-xs text-gray-500">${job.outputFormat.toUpperCase()} • ${this.getStatusText(job.status)}</div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            ${job.status === 'processing' ? '<div class="loading-spinner"></div>' : ''}
+                            ${job.status === 'completed' ? '<i class="fas fa-check-circle text-green-500"></i>' : ''}
+                            ${job.status === 'failed' ? '<i class="fas fa-exclamation-circle text-red-500"></i>' : ''}
+                            ${job.status === 'queued' ? `<button onclick="conversionQueue.remove('${job.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-times"></i></button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                queueContainer.innerHTML = queueHtml;
+            }
+
+            getStatusText(status) {
+                const statusMap = {
+                    'queued': 'Waiting',
+                    'processing': 'Converting...',
+                    'completed': 'Done',
+                    'failed': 'Failed'
+                };
+                return statusMap[status] || status;
+            }
+
+            remove(jobId) {
+                this.queue = this.queue.filter(job => job.id !== jobId);
+                this.updateQueueDisplay();
+            }
+
+            clear() {
+                this.queue = this.queue.filter(job => job.status === 'processing');
+                this.updateQueueDisplay();
+            }
+        }
+
+        // Initialize conversion queue
+        const conversionQueue = new ConversionQueue();
+
+        // Add queue display to the interface
+        function addQueueDisplay() {
+            const conversionOptions = document.getElementById('conversionOptions');
+            const queueSection = document.createElement('div');
+            queueSection.className = 'mt-6 p-4 bg-gray-50 rounded-lg';
+            queueSection.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-semibold text-gray-700">Conversion Queue</h4>
+                    <button onclick="conversionQueue.clear()" class="text-sm text-red-600 hover:text-red-800">
+                        Clear Completed
+                    </button>
+                </div>
+                <div id="queueDisplay" class="space-y-2">
+                    <p class="text-gray-500 text-center">No files in queue</p>
+                </div>
+            `;
+            
+            const convertBtn = document.getElementById('convertBtn');
+            conversionOptions.insertBefore(queueSection, convertBtn);
+        }
+
+        // Enhanced batch conversion
+        async function startBatchConversion() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const selectedQuality = document.querySelector('.quality-option.selected').dataset.quality;
+
+            if (!outputFormat) {
+                showErrorNotification('Please select an output format');
+                return;
+            }
+
+            if (selectedFiles.length === 0) {
+                showErrorNotification('Please select files to convert');
+                return;
+            }
+
+            // Add all files to queue
+            selectedFiles.forEach(file => {
+                const options = window.advancedOptions || {};
+                conversionQueue.add(file, outputFormat, selectedQuality, options);
+            });
+
+            // Start processing
+            conversionQueue.processNext();
+
+            // Update UI
+            conversionStats.activeJobs += selectedFiles.length;
+            updateStats();
+
+            showSuccessNotification(`${selectedFiles.length} file(s) added to conversion queue`, '#');
+            resetForm();
+        }
+
+        // Replace single conversion with batch conversion
+        function startConversion() {
+            startBatchConversion();
+        }
+
+        // Keyboard shortcuts enhancement
+        document.addEventListener('keydown', function(event) {
+            // Escape key to close modals
+            if (event.key === 'Escape') {
+                hideProgressModal();
+                hideNotification();
+                // Close any open modals
+                document.querySelectorAll('.fixed.inset-0').forEach(modal => modal.remove());
+            }
+
+            // Ctrl/Cmd + U to upload files
+            if ((event.ctrlKey || event.metaKey) && event.key === 'u') {
+                event.preventDefault();
+                if (!document.getElementById('fileInput').disabled) {
+                    document.getElementById('fileInput').click();
                 }
             }
 
-            hideProgressModal();
+            // Ctrl/Cmd + Enter to start conversion
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault();
+                const convertBtn = document.getElementById('convertBtn');
+                if (convertBtn && !convertBtn.disabled) {
+                    startConversion();
+                }
+            }
+
+            // Delete key to remove selected files
+            if (event.key === 'Delete' && selectedFiles.length > 0) {
+                if (confirm(`Remove ${selectedFiles.length} selected file(s)?`)) {
+                    resetForm();
+                }
+            }
+        });
+
+        // Context menu for files
+        document.addEventListener('contextmenu', function(event) {
+            const fileItem = event.target.closest('#fileList > div');
+            if (fileItem) {
+                event.preventDefault();
+                showFileContextMenu(event, fileItem);
+            }
+        });
+
+        function showFileContextMenu(event, fileItem) {
+            // Remove existing context menu
+            document.querySelectorAll('.context-menu').forEach(menu => menu.remove());
+
+            const contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu fixed bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50';
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+
+            const fileIndex = Array.from(fileItem.parentElement.children).indexOf(fileItem);
+            
+            contextMenu.innerHTML = `
+                <button onclick="previewFile(${fileIndex}); document.querySelectorAll('.context-menu').forEach(m => m.remove())" 
+                        class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center">
+                    <i class="fas fa-eye mr-2"></i> Preview
+                </button>
+                <button onclick="removeFile(${fileIndex}); document.querySelectorAll('.context-menu').forEach(m => m.remove())" 
+                        class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center text-red-600">
+                    <i class="fas fa-trash mr-2"></i> Remove
+                </button>
+                <hr class="my-1">
+                <button onclick="copyFileInfo(${fileIndex}); document.querySelectorAll('.context-menu').forEach(m => m.remove())" 
+                        class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center">
+                    <i class="fas fa-copy mr-2"></i> Copy Info
+                </button>
+            `;
+
+            document.body.appendChild(contextMenu);
+
+            // Remove context menu when clicking elsewhere
+            setTimeout(() => {
+                document.addEventListener('click', function removeContextMenu() {
+                    contextMenu.remove();
+                    document.removeEventListener('click', removeContextMenu);
+                });
+            }, 0);
         }
 
+        function copyFileInfo(index) {
+            const file = selectedFiles[index];
+            const fileType = getFileType(file.name);
+            const info = `File: ${file.name}\nSize: ${formatFileSize(file.size)}\nType: ${fileType.toUpperCase()}\nLast Modified: ${new Date(file.lastModified).toLocaleString()}`;
+            
+            navigator.clipboard.writeText(info).then(() => {
+                showSuccessNotification('File information copied to clipboard', '#');
+            }).catch(() => {
+                showErrorNotification('Failed to copy file information');
+            });
+        }
+
+        // Performance monitoring and optimization
+        class PerformanceMonitor {
+            constructor() {
+                this.metrics = {
+                    conversions: [],
+                    memoryUsage: [],
+                    loadTimes: []
+                };
+                this.startMonitoring();
+            }
+
+            startMonitoring() {
+                // Monitor memory usage every 30 seconds
+                setInterval(() => {
+                    if (performance.memory) {
+                        this.metrics.memoryUsage.push({
+                            timestamp: Date.now(),
+                            used: performance.memory.usedJSHeapSize,
+                            total: performance.memory.totalJSHeapSize,
+                            limit: performance.memory.jsHeapSizeLimit
+                        });
+
+                        // Keep only last 100 measurements
+                        if (this.metrics.memoryUsage.length > 100) {
+                            this.metrics.memoryUsage = this.metrics.memoryUsage.slice(-100);
+                        }
+
+                        // Warn if memory usage is high
+                        const usagePercent = (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit) * 100;
+                        if (usagePercent > 80) {
+                            console.warn('High memory usage detected:', usagePercent.toFixed(1) + '%');
+                            this.suggestMemoryCleanup();
+                        }
+                    }
+                }, 30000);
+            }
+
+            logConversion(duration, fileSize, inputFormat, outputFormat) {
+                this.metrics.conversions.push({
+                    timestamp: Date.now(),
+                    duration,
+                    fileSize,
+                    inputFormat,
+                    outputFormat,
+                    throughput: fileSize / (duration / 1000) // bytes per second
+                });
+
+                // Keep only last 50 conversions
+                if (this.metrics.conversions.length > 50) {
+                    this.metrics.conversions = this.metrics.conversions.slice(-50);
+                }
+            }
+
+            suggestMemoryCleanup() {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-4 bg-yellow-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm';
+                notification.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                        <div>
+                            <div class="font-semibold">Memory Usage High</div>
+                            <div class="text-sm opacity-90 mt-1">Consider refreshing the page if you experience slowdowns.</div>
+                            <button onclick="location.reload()" class="mt-2 bg-white text-yellow-600 px-3 py-1 rounded text-sm font-semibold">
+                                Refresh Page
+                            </button>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 15000);
+            }
+
+            getAverageConversionTime() {
+                if (this.metrics.conversions.length === 0) return 0;
+                const total = this.metrics.conversions.reduce((sum, conv) => sum + conv.duration, 0);
+                return total / this.metrics.conversions.length;
+            }
+
+            getThroughputStats() {
+                if (this.metrics.conversions.length === 0) return { avg: 0, max: 0, min: 0 };
+                
+                const throughputs = this.metrics.conversions.map(conv => conv.throughput);
+                return {
+                    avg: throughputs.reduce((sum, t) => sum + t, 0) / throughputs.length,
+                    max: Math.max(...throughputs),
+                    min: Math.min(...throughputs)
+                };
+            }
+        }
+
+        // Initialize performance monitor
+        const performanceMonitor = new PerformanceMonitor();
+
+        // Add performance stats to the interface
+        function showPerformanceStats() {
+            const avgTime = performanceMonitor.getAverageConversionTime();
+            const throughput = performanceMonitor.getThroughputStats();
+            
+            const statsModal = document.createElement('div');
+            statsModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            statsModal.innerHTML = `
+                <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold gradient-text">Performance Stats</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                                        <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">Average Conversion Time</div>
+                            <div class="text-2xl font-bold text-blue-600">${(avgTime / 1000).toFixed(2)}s</div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">Average Throughput</div>
+                            <div class="text-2xl font-bold text-green-600">${formatFileSize(throughput.avg)}/s</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-3 rounded-lg text-center">
+                                <div class="text-xs text-gray-500">Total Conversions</div>
+                                <div class="text-lg font-semibold">${performanceMonitor.metrics.conversions.length}</div>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg text-center">
+                                <div class="text-xs text-gray-500">Memory Usage</div>
+                                <div class="text-lg font-semibold">${performance.memory ? Math.round((performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit) * 100) + '%' : 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        ${throughput.max > 0 ? `
+                        <div class="border-t pt-4">
+                            <div class="text-sm text-gray-600 mb-2">Throughput Range</div>
+                            <div class="flex justify-between text-sm">
+                                <span>Min: ${formatFileSize(throughput.min)}/s</span>
+                                <span>Max: ${formatFileSize(throughput.max)}/s</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="w-full mt-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:shadow-lg">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(statsModal);
+        }
+
+        // Add performance stats button to navigation
+        function addPerformanceStatsButton() {
+            const nav = document.querySelector('nav .flex.items-center.space-x-6');
+            const statsBtn = document.createElement('button');
+            statsBtn.className = 'hidden md:flex items-center space-x-2 text-white/80 text-sm hover:text-white transition-colors';
+            statsBtn.innerHTML = '<i class="fas fa-chart-line"></i><span>Stats</span>';
+            statsBtn.onclick = showPerformanceStats;
+            nav.insertBefore(statsBtn, nav.lastElementChild);
+        }
+
+        // File compression utilities
+        class CompressionUtils {
+            static async compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
+                return new Promise((resolve, reject) => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+
+                    img.onload = () => {
+                        // Calculate new dimensions
+                        let { width, height } = img;
+                        
+                        if (width > maxWidth || height > maxHeight) {
+                            const ratio = Math.min(maxWidth / width, maxHeight / height);
+                            width *= ratio;
+                            height *= ratio;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Draw and compress
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob(resolve, 'image/jpeg', quality);
+                        URL.revokeObjectURL(img.src);
+                    };
+
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+
+            static estimateCompressionRatio(inputSize, outputFormat, quality) {
+                const ratios = {
+                    'jpg': { high: 0.3, medium: 0.2, low: 0.1 },
+                    'webp': { high: 0.25, medium: 0.15, low: 0.08 },
+                    'png': { high: 0.8, medium: 0.6, low: 0.4 },
+                    'mp4': { high: 0.4, medium: 0.25, low: 0.15 },
+                    'webm': { high: 0.35, medium: 0.2, low: 0.12 },
+                    'mp3': { high: 0.1, medium: 0.08, low: 0.06 }
+                };
+
+                const formatRatios = ratios[outputFormat] || { high: 0.5, medium: 0.3, low: 0.2 };
+                const ratio = formatRatios[quality] || formatRatios.medium;
+                
+                return Math.round(inputSize * ratio);
+            }
+        }
+
+        // Enhanced conversion with compression estimation
+        function updateConversionPreview() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const selectedQuality = document.querySelector('.quality-option.selected')?.dataset.quality;
+            
+            if (!outputFormat || selectedFiles.length === 0) return;
+
+            const previewContainer = document.getElementById('conversionPreview');
+            if (!previewContainer) return;
+
+            let totalInputSize = 0;
+            let totalEstimatedSize = 0;
+
+            selectedFiles.forEach(file => {
+                totalInputSize += file.size;
+                totalEstimatedSize += CompressionUtils.estimateCompressionRatio(file.size, outputFormat, selectedQuality);
+            });
+
+            const compressionRatio = ((totalInputSize - totalEstimatedSize) / totalInputSize * 100).toFixed(1);
+            const sizeDiff = totalInputSize - totalEstimatedSize;
+
+            previewContainer.innerHTML = `
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">Conversion Preview</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Input Size:</span>
+                            <span class="font-semibold">${formatFileSize(totalInputSize)}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Estimated Output:</span>
+                            <span class="font-semibold">${formatFileSize(totalEstimatedSize)}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Compression:</span>
+                            <span class="font-semibold ${sizeDiff > 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${sizeDiff > 0 ? '-' : '+'}${Math.abs(compressionRatio)}%
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Space ${sizeDiff > 0 ? 'Saved' : 'Added'}:</span>
+                            <span class="font-semibold">${formatFileSize(Math.abs(sizeDiff))}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add conversion preview container
+        function addConversionPreview() {
+            const conversionOptions = document.getElementById('conversionOptions');
+            const previewContainer = document.createElement('div');
+            previewContainer.id = 'conversionPreview';
+            
+            const convertBtn = document.getElementById('convertBtn');
+            conversionOptions.insertBefore(previewContainer, convertBtn);
+        }
+
+        // Update preview when format or quality changes
+        document.addEventListener('change', function(event) {
+            if (event.target.id === 'outputFormat') {
+                updateConversionPreview();
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.quality-option')) {
+                setTimeout(updateConversionPreview, 100);
+            }
+        });
+
+        // Drag and drop enhancements
+        let dragCounter = 0;
+
+        document.addEventListener('dragenter', function(event) {
+            event.preventDefault();
+            dragCounter++;
+            
+            if (dragCounter === 1) {
+                showDragOverlay();
+            }
+        });
+
+        document.addEventListener('dragleave', function(event) {
+            event.preventDefault();
+            dragCounter--;
+            
+            if (dragCounter === 0) {
+                hideDragOverlay();
+            }
+        });
+
+        document.addEventListener('drop', function(event) {
+            event.preventDefault();
+            dragCounter = 0;
+            hideDragOverlay();
+        });
+
+        function showDragOverlay() {
+            let overlay = document.getElementById('dragOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'dragOverlay';
+                overlay.className = 'fixed inset-0 bg-blue-500 bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-40';
+                overlay.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 shadow-2xl text-center">
+                        <i class="fas fa-cloud-upload-alt text-6xl text-blue-500 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Drop Files Here</h3>
+                        <p class="text-gray-600">Release to add files for conversion</p>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+        }
+
+        function hideDragOverlay() {
+            const overlay = document.getElementById('dragOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        // Accessibility improvements
+        function enhanceAccessibility() {
+            // Add ARIA labels
+            document.getElementById('fileInput').setAttribute('aria-label', 'Select files for conversion');
+            document.getElementById('outputFormat').setAttribute('aria-label', 'Choose output format');
+            
+            // Add keyboard navigation for quality options
+            document.querySelectorAll('.quality-option').forEach((option, index) => {
+                option.setAttribute('tabindex', '0');
+                option.setAttribute('role', 'button');
+                option.setAttribute('aria-label', `Select ${option.dataset.quality} quality`);
+                
+                option.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+
+            // Add focus indicators
+            const style = document.createElement('style');
+            style.textContent = `
+                .quality-option:focus {
+                    outline: 2px solid #667eea;
+                    outline-offset: 2px;
+                }
+                
+                button:focus, select:focus, input:focus {
+                    outline: 2px solid #667eea;
+                    outline-offset: 2px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Initialize all enhancements
+        function initializeEnhancements() {
+            addAdvancedOptionsButton();
+            addQueueDisplay();
+            addConversionPreview();
+            addPerformanceStatsButton();
+            enhanceAccessibility();
+            
+            // Override the original displayFileList with enhanced version
+            window.originalDisplayFileList = displayFileList;
+            window.displayFileList = displayFileListEnhanced;
+        }
+
+        // Call enhancements after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initializeEnhancements, 1000);
+        });
+
+        // Export functionality for sharing converted files
+        class ShareManager {
+            static async shareFile(blob, filename) {
+                if (navigator.share && navigator.canShare) {
+                    try {
+                        const file = new File([blob], filename, { type: blob.type });
+                        await navigator.share({
+                            files: [file],
+                            title: 'Converted File',
+                            text: `Check out this converted file: ${filename}`
+                        });
+                    } catch (error) {
+                        console.log('Sharing failed:', error);
+                        this.fallbackShare(blob, filename);
+                    }
+                } else {
+                    this.fallbackShare(blob, filename);
+                }
+            }
+
+            static fallbackShare(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const shareModal = document.createElement('div');
+                shareModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                shareModal.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+                        <h3 class="text-xl font-bold mb-4">Share Converted File</h3>
+                        <div class="space-y-4">
+                            <button onclick="this.closest('.fixed').remove(); window.open('${url}')" 
+                                    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                                <i class="fas fa-external-link-alt mr-2"></i>Open in New Tab
+                            </button>
+                            <button onclick="navigator.clipboard.writeText('${url}'); showSuccessNotification('Link copied to clipboard', '#')" 
+                                    class="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">
+                                <i class="fas fa-copy mr-2"></i>Copy Link
+                            </button>
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(shareModal);
+                
+                setTimeout(() => URL.revokeObjectURL(url), 300000); // Clean up after 5 minutes
+            }
+        }
+
+        // Final initialization and cleanup
+        window.addEventListener('beforeunload', function() {
+            // Clean up any remaining object URLs
+            cleanupMemory();
+            
+            // Save any pending analytics
+            if (analytics) {
+                const currentAnalytics = analytics.getAnalytics();
+                analytics.saveAnalytics(currentAnalytics);
+            }
+        });
+
+        console.log('🚀 MediaForge Pro - Client-Side Media Converter Loaded');
+        console.log('📧 Developed by: Niranga Nayanajith');
+        console.log('🔗 LinkedIn: https://www.linkedin.com/in/niranga-nayanajith-548a0a302');
+        console.log('✨ All processing happens in your browser - your files never leave your device!');
     </script>
 </body>
 </html>
