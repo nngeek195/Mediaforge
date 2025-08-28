@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaForge Pro - Client-Side Media Converter | by Niranga Nayanajith</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .floating-animation {
+            animation: floating 6s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .drag-over {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px dashed #667eea !important;
+            transform: scale(1.02);
+        }
+
+        .format-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .file-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .video-preview { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .audio-preview { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .image-preview { background: linear-gradient(135deg, #feca57, #ff9ff3); }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .quality-option {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quality-option:hover {
+            border-color: #667eea;
+        }
+
+        .quality-option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-online { background: #10b981; }
+        .status-processing { background: #f59e0b; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="glass-effect fixed w-full top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-magic text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-white text-xl font-bold">MediaForge Pro</h1>
+                    <p class="text-white/70 text-sm">Client-Side Media Converter</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="hidden md:flex items-center space-x-2 text-white/80 text-sm">
+                    <span class="status-indicator status-online"></span>
+                    <span id="systemStatus">System Ready</span>
+                </div>
+                <div class="text-white/80 text-sm">
+                    <i class="fab fa-linkedin text-blue-400"></i>
+                    <a href="https://www.linkedin.com/in/niranga-nayanajith-548a0a302" target="_blank" class="hover:text-white transition-colors">
+                        Niranga Nayanajith
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-24 px-6 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-6xl font-bold text-white mb-4">
+                    Client-Side Media <span class="text-yellow-300">Conversion</span>
+                </h2>
+                <p class="text-white/80 text-xl mb-8 max-w-3xl mx-auto">
+                    Professional-grade media conversion running entirely in your browser with zero server dependency
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-effect rounded-xl p-4 text-white">
+                        <div class="text-2xl font-bold" id="totalConversions">0</div>
+                        <div class="text-sm opacity-80">Total Conversions</div>
+                    </div>
+                    <div class="glass-effect rounded-xl p-4 text-white">
+                        <div class="text-2xl font-bold" id="activeJobs">0</div>
+                        <div class="text-sm opacity-80">Active Jobs</div>
+                    </div>
+                    <div class="glass-effect rounded-xl p-4 text-white">
+                        <div class="text-2xl font-bold">100%</div>
+                        <div class="text-sm opacity-80">Privacy</div>
+                    </div>
+                    <div class="glass-effect rounded-xl p-4 text-white">
+                        <div class="text-2xl font-bold" id="ffmpegStatus">Loading</div>
+                        <div class="text-sm opacity-80">FFmpeg Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="glass-card p-8 rounded-2xl">
+                        <h3 class="text-2xl font-bold gradient-text mb-6">
+                            <i class="fas fa-cloud-upload-alt mr-3"></i>Upload & Convert
+                        </h3>
+
+                        <div id="ffmpegLoading" class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center">
+                                <div class="loading-spinner"></div>
+                                <span class="text-blue-700">Loading FFmpeg engine... Please wait.</span>
+                            </div>
+                        </div>
+
+                        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all duration-300 hover:border-blue-400 cursor-pointer opacity-50">
+                            <div class="floating-animation">
+                                <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-700 mb-2">Drop files here or click to browse</h4>
+                            <p class="text-gray-500 mb-4">Supports video, audio, and image formats (Client-side processing)</p>
+                            <input type="file" id="fileInput" class="hidden" multiple accept="video/*,audio/*,image/*" disabled>
+                            <button id="selectFilesBtn" onclick="document.getElementById('fileInput').click()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all opacity-50" disabled>
+                                <i class="fas fa-plus mr-2"></i>Select Files
+                            </button>
+                        </div>
+
+                        <div id="fileList" class="mt-6 space-y-4"></div>
+
+                        <div id="conversionOptions" class="mt-6 hidden">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Output Format</label>
+                                    <select id="outputFormat" class="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                        <option value="">Select format...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Quality Settings</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div class="quality-option selected" data-quality="high">
+                                            <div class="font-semibold">High</div>
+                                            <div class="text-xs opacity-70">Best Quality</div>
+                                        </div>
+                                        <div class="quality-option" data-quality="medium">
+                                            <div class="font-semibold">Medium</div>
+                                            <div class="text-xs opacity-70">Balanced</div>
+                                        </div>
+                                        <div class="quality-option" data-quality="low">
+                                            <div class="font-semibold">Low</div>
+                                            <div class="text-xs opacity-70">Fast</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="convertBtn" onclick="startConversion()" class="w-full mt-6 bg-gradient-to-r from-green-500 to-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition-all">
+                                <i class="fas fa-magic mr-2"></i>Start Conversion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-xl font-bold gradient-text mb-6">
+                            <i class="fas fa-list mr-2"></i>Supported Formats
+                        </h3>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-video text-red-500 mr-2"></i>Video Formats
+                                </h4>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="format-badge">MP4</span>
+                                    <span class="format-badge">AVI</span>
+                                    <span class="format-badge">MOV</span>
+                                    <span class="format-badge">WEBM</span>
+                                    <span class="format-badge">MKV</span>
+                                    <span class="format-badge">GIF</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-music text-green-500 mr-2"></i>Audio Formats
+                                </h4>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="format-badge">MP3</span>
+                                    <span class="format-badge">WAV</span>
+                                    <span class="format-badge">AAC</span>
+                                    <span class="format-badge">OGG</span>
+                                    <span class="format-badge">M4A</span>
+                                    <span class="format-badge">FLAC</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-image text-blue-500 mr-2"></i>Image Formats
+                                </h4>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="format-badge">JPEG</span>
+                                    <span class="format-badge">PNG</span>
+                                    <span class="format-badge">WEBP</span>
+                                    <span class="format-badge">BMP</span>
+                                    <span class="format-badge">GIF</span>
+                                    <span class="format-badge">TIFF</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-700 mb-3">Features</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Privacy</span>
+                                    <span class="font-semibold text-green-600">100% Local</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>File Size Limit</span>
+                                    <span class="font-semibold text-blue-600">No Limit</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Processing</span>
+                                    <span class="font-semibold text-purple-600">Client-Side</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-6">
+                            <svg class="progress-ring w-32 h-32" width="128" height="128">
+                                <circle class="progress-ring-circle stroke-current text-gray-300" stroke-width="6" fill="transparent" r="58" cx="64" cy="64"/>
+                                <circle class="progress-ring-circle stroke-current text-blue-600" stroke-width="6" fill="transparent" r="58" cx="64" cy="64"
+                                        stroke-dasharray="364.4" stroke-dashoffset="364.4" id="progressCircle"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="progressPercentage" class="text-2xl font-bold text-gray-700">0%</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Converting Your File</h3>
+                        <p class="text-gray-600 mb-4" id="progressStatus">Initializing conversion...</p>
+                        <div class="space-y-2 text-sm text-gray-500">
+                            <div class="flex justify-between">
+                                <span>File:</span>
+                                <span id="currentFileName">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Format:</span>
+                                <span id="currentFormat">-</span>
+                            </div>
+                        </div>
+                        <button onclick="cancelConversion()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        <div class="bg-green-500 text-white p-4 rounded-lg shadow-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-xl mr-3"></i>
+                <div>
+                    <div class="font-semibold">Conversion Complete!</div>
+                    <div class="text-sm opacity-90">Your file has been successfully converted.</div>
+                </div>
+                <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-20 pb-8 text-center text-white/60">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="mb-4 md:mb-0">
+                    <p>&copy; 2024 MediaForge Pro. Developed by
+                        <a href="https://www.linkedin.com/in/niranga-nayanajith-548a0a302" target="_blank" class="text-blue-400 hover:text-blue-300">
+                            Niranga Nayanajith
+                        </a>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="https://github.com" target="_blank" class="hover:text-white transition-colors">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/niranga-nayanajith-548a0a302" target="_blank" class="hover:text-white transition-colors">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="mailto:contact@mediaforge.pro" class="hover:text-white transition-colors">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let ffmpeg = null;
+        let isFFmpegLoaded = false;
+        let conversionStats = {
+            totalConversions: 0,
+            activeJobs: 0
+        };
+        let currentConversionProcess = null;
+
+        // Format mappings for client-side conversion
+        const formatMappings = {
+            video: {
+                extensions: ['mp4', 'avi', 'mov', 'mkv', 'webm', 'm4v', '3gp', 'ogv', 'flv'],
+                outputs: ['mp4', 'avi', 'mov', 'webm', 'mkv', 'gif', 'mp3', 'wav', 'aac', 'ogg']
+            },
+            audio: {
+                extensions: ['mp3', 'wav', 'flac', 'aac', 'm4a', 'ogg', 'wma', 'opus'],
+                outputs: ['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a']
+            },
+            image: {
+                extensions: ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff', 'webp'],
+                outputs: ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif']
+            }
+        };
+
+        // MediaConverter class for client-side conversion
+        class ClientMediaConverter {
+            constructor() {
+                this.canvas = document.createElement('canvas');
+                this.ctx = this.canvas.getContext('2d');
+            }
+
+            async convertImage(file, outputFormat, quality = 0.9) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const canvas = this.canvas;
+                    const ctx = this.ctx;
+
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        const mimeType = `image/${outputFormat === 'jpg' ? 'jpeg' : outputFormat}`;
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Image conversion failed'));
+                            }
+                        }, mimeType, quality);
+                    };
+
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+
+            async convertVideoAudio(file, outputFormat, quality = 'medium') {
+                if (!isFFmpegLoaded) {
+                    throw new Error('FFmpeg not loaded');
+                }
+
+                const inputFileName = `input.${file.name.split('.').pop()}`;
+                const outputFileName = `output.${outputFormat}`;
+
+                try {
+                    // Write input file to FFmpeg filesystem
+                    await ffmpeg.writeFile(inputFileName, await this.fetchFile(file));
+
+                    let ffmpegArgs = [];
+
+                    // Configure conversion based on output format and quality
+                    if (outputFormat === 'mp3') {
+                        const bitrates = { low: '128k', medium: '192k', high: '320k' };
+                        ffmpegArgs = ['-i', inputFileName, '-b:a', bitrates[quality] || '192k', outputFileName];
+                    } else if (outputFormat === 'wav') {
+                        ffmpegArgs = ['-i', inputFileName, '-acodec', 'pcm_s16le', outputFileName];
+                    } else if (outputFormat === 'aac') {
+                        const bitrates = { low: '128k', medium: '192k', high: '256k' };
+                        ffmpegArgs = ['-i', inputFileName, '-c:a', 'aac', '-b:a', bitrates[quality] || '192k', outputFileName];
+                    } else if (outputFormat === 'ogg') {
+                        ffmpegArgs = ['-i', inputFileName, '-c:a', 'libvorbis', '-q:a', '5', outputFileName];
+                    } else if (outputFormat === 'mp4') {
+                        const crfValues = { low: '28', medium: '23', high: '18' };
+                        ffmpegArgs = ['-i', inputFileName, '-c:v', 'libx264', '-crf', crfValues[quality] || '23', '-c:a', 'aac', outputFileName];
+                    } else if (outputFormat === 'webm') {
+                        ffmpegArgs = ['-i', inputFileName, '-c:v', 'libvpx-vp9', '-c:a', 'libopus', outputFileName];
+                    } else if (outputFormat === 'avi') {
+                        ffmpegArgs = ['-i', inputFileName, '-c:v', 'libx264', '-c:a', 'mp3', outputFileName];
+                    } else if (outputFormat === 'gif') {
+                        ffmpegArgs = ['-i', inputFileName, '-vf', 'fps=10,scale=480:-1:flags=lanczos', '-t', '10', outputFileName];
+                    } else {
+                        // Default conversion
+                        ffmpegArgs = ['-i', inputFileName, outputFileName];
+                    }
+                    
+                    // ***FIX 3: Use ffmpeg.run() instead of the deprecated ffmpeg.exec()***
+                    // Execute FFmpeg conversion
+                    await ffmpeg.run(...ffmpegArgs);
+
+                    // Read the output file
+                    const data = await ffmpeg.readFile(outputFileName);
+                    
+                    // Clean up
+                    await ffmpeg.deleteFile(inputFileName);
+                    await ffmpeg.deleteFile(outputFileName);
+
+                    return new Blob([data.buffer]);
+
+                } catch (error) {
+                    console.error('FFmpeg conversion error:', error);
+                    throw new Error(`Conversion failed: ${error.message || 'Unknown FFmpeg error'}`);
+                }
+            }
+
+            async fetchFile(file) {
+                return new Uint8Array(await file.arrayBuffer());
+            }
+        }
+
+        // Initialize FFmpeg
+        async function initializeFFmpeg() {
+            try {
+                // ***FIX 1: Use window.FFmpeg and window.FFmpegUtil to access the loaded scripts***
+                const { FFmpeg } = window.FFmpeg;
+                const { toBlobURL } = window.FFmpegUtil;
+
+                ffmpeg = new FFmpeg();
+
+                // Set up progress callback
+                ffmpeg.on('progress', ({ progress }) => {
+                    if (currentConversionProcess) {
+                        updateProgressDisplay({ progress: Math.round(progress * 100) });
+                    }
+                });
+
+                // Load FFmpeg
+                // ***FIX 2: Update the core URL to a version compatible with the main library***
+                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+                await ffmpeg.load({
+                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+                });
+
+                isFFmpegLoaded = true;
+                updateFFmpegStatus('Ready');
+                enableInterface();
+
+            } catch (error) {
+                console.error('FFmpeg initialization failed:', error);
+                updateFFmpegStatus('Failed');
+                showErrorNotification('Failed to initialize media conversion engine. Some features may not work.');
+            }
+        }
+
+        function updateFFmpegStatus(status) {
+            const statusElement = document.getElementById('ffmpegStatus');
+            const systemStatus = document.getElementById('systemStatus');
+            
+            statusElement.textContent = status;
+            
+            if (status === 'Ready') {
+                systemStatus.textContent = 'System Ready';
+                document.querySelector('.status-indicator').className = 'status-indicator status-online';
+            } else if (status === 'Failed') {
+                systemStatus.textContent = 'Limited Mode';
+                document.querySelector('.status-indicator').className = 'status-indicator status-processing';
+            }
+        }
+
+        function enableInterface() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const selectBtn = document.getElementById('selectFilesBtn');
+            const ffmpegLoading = document.getElementById('ffmpegLoading');
+
+            dropZone.style.opacity = '1';
+            fileInput.disabled = false;
+            selectBtn.disabled = false;
+            selectBtn.classList.remove('opacity-50');
+            ffmpegLoading.style.display = 'none';
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            initializeFFmpeg();
+            loadStats();
+        });
+
+        function initializeEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const dropZone = document.getElementById('dropZone');
+
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+            dropZone.addEventListener('click', () => {
+                if (!fileInput.disabled) {
+                    fileInput.click();
+                }
+            });
+
+            // Quality selector
+            document.querySelectorAll('.quality-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            processSelectedFiles(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+
+            const files = Array.from(event.dataTransfer.files);
+            processSelectedFiles(files);
+        }
+
+        function processSelectedFiles(files) {
+            selectedFiles = [...selectedFiles, ...files]; // Append new files
+            displayFileList(selectedFiles);
+            updateOutputFormats(selectedFiles);
+            showConversionOptions();
+        }
+
+
+        function displayFileList(files) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            files.forEach((file, index) => {
+                const fileType = getFileType(file.name);
+                const fileItem = createFileItem(file, fileType, index);
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function createFileItem(file, fileType, index) {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all';
+
+            const previewClass = `${fileType}-preview`;
+            const iconClass = fileType === 'video' ? 'fa-video' : fileType === 'audio' ? 'fa-music' : 'fa-image';
+
+            div.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="file-preview ${previewClass}">
+                        <i class="fas ${iconClass}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${file.name}</h4>
+                        <p class="text-sm text-gray-500">${formatFileSize(file.size)} • ${fileType.toUpperCase()}</p>
+                    </div>
+                    <button onclick="removeFile(${index})" class="text-red-500 hover:text-red-700 p-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            return div;
+        }
+
+        function getFileType(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+
+            for (const [type, config] of Object.entries(formatMappings)) {
+                if (config.extensions.includes(extension)) {
+                    return type;
+                }
+            }
+
+            return 'unknown';
+        }
+
+        function updateOutputFormats(files) {
+            const outputFormat = document.getElementById('outputFormat');
+            const uniqueTypes = [...new Set(files.map(file => getFileType(file.name)))];
+
+            outputFormat.innerHTML = '<option value="">Select output format...</option>';
+
+            // Get all possible output formats for selected file types
+            const possibleOutputs = new Set();
+
+            uniqueTypes.forEach(type => {
+                if (formatMappings[type]) {
+                    formatMappings[type].outputs.forEach(format => {
+                        possibleOutputs.add(format);
+                    });
+                }
+            });
+
+            // Group formats by type
+            const videoFormats = ['mp4', 'avi', 'mov', 'webm', 'mkv', 'gif'].filter(f => possibleOutputs.has(f));
+            const audioFormats = ['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a'].filter(f => possibleOutputs.has(f));
+            const imageFormats = ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'].filter(f => possibleOutputs.has(f));
+
+            if (videoFormats.length > 0) {
+                const videoGroup = document.createElement('optgroup');
+                videoGroup.label = 'Video Formats';
+                videoFormats.forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format;
+                    option.textContent = format.toUpperCase();
+                    videoGroup.appendChild(option);
+                });
+                outputFormat.appendChild(videoGroup);
+            }
+
+            if (audioFormats.length > 0) {
+                const audioGroup = document.createElement('optgroup');
+                audioGroup.label = 'Audio Formats';
+                audioFormats.forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format;
+                    option.textContent = format.toUpperCase();
+                    audioGroup.appendChild(option);
+                });
+                outputFormat.appendChild(audioGroup);
+            }
+
+            if (imageFormats.length > 0) {
+                const imageGroup = document.createElement('optgroup');
+                imageGroup.label = 'Image Formats';
+                imageFormats.forEach(format => {
+                    const option = document.createElement('option');
+                    option.value = format;
+                    option.textContent = format.toUpperCase();
+                    imageGroup.appendChild(option);
+                });
+                outputFormat.appendChild(imageGroup);
+            }
+        }
+
+        function showConversionOptions() {
+            if (selectedFiles.length > 0) {
+                document.getElementById('conversionOptions').classList.remove('hidden');
+            }
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+
+            if (selectedFiles.length === 0) {
+                document.getElementById('conversionOptions').classList.add('hidden');
+                document.getElementById('fileList').innerHTML = '';
+            } else {
+                displayFileList(selectedFiles);
+                updateOutputFormats(selectedFiles);
+            }
+        }
+
+        async function startConversion() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const selectedQuality = document.querySelector('.quality-option.selected').dataset.quality;
+
+            if (!outputFormat) {
+                showErrorNotification('Please select an output format');
+                return;
+            }
+
+            if (selectedFiles.length === 0) {
+                showErrorNotification('Please select files to convert');
+                return;
+            }
+            
+            startBatchConversion();
+        }
+
+        function cancelConversion() {
+            // FFmpeg.wasm v0.12 doesn't have a direct abort/cancel method exposed after execution starts.
+            // This reloads the page as a hard stop. A more graceful solution would require a different library version or architecture.
+            showErrorNotification('Conversion cancelled by user. Reloading...');
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        function updateProgressDisplay(status) {
+            const progressCircle = document.getElementById('progressCircle');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressStatus = document.getElementById('progressStatus');
+
+            const progress = status.progress || 0;
+
+            // Update progress circle
+            const circumference = 2 * Math.PI * 58;
+            const strokeDashoffset = circumference - (progress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = strokeDashoffset;
+
+            // Update percentage
+            progressPercentage.textContent = Math.round(progress) + '%';
+
+            // Update status message
+            if (progress < 25) {
+                progressStatus.textContent = 'Preparing files...';
+            } else if (progress < 50) {
+                progressStatus.textContent = 'Processing data...';
+            } else if (progress < 75) {
+                progressStatus.textContent = 'Applying codecs...';
+            } else if (progress < 100) {
+                progressStatus.textContent = 'Finalizing output...';
+            } else {
+                progressStatus.textContent = 'Conversion complete!';
+            }
+        }
+
+        function showProgressModal() {
+            document.getElementById('progressModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideProgressModal() {
+            document.getElementById('progressModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showSuccessNotification(message, downloadUrl) {
+            const notification = document.getElementById('notification');
+            const notificationContent = notification.querySelector('div');
+
+            notificationContent.className = 'bg-green-500 text-white p-4 rounded-lg shadow-lg';
+            notificationContent.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-xl mr-3"></i>
+                        <div>
+                            <div class="font-semibold">Success!</div>
+                            <div class="text-sm opacity-90">${message}</div>
+                        </div>
+                    </div>
+                    <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            notification.classList.add('show');
+            
+            if (downloadUrl && downloadUrl !== '#') {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = message.split(' ')[0]; // Basic filename extraction
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
+            }
+
+            setTimeout(hideNotification, 5000);
+        }
+
+
+        function showErrorNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationContent = notification.querySelector('div');
+
+            notificationContent.className = 'bg-red-500 text-white p-4 rounded-lg shadow-lg';
+            notificationContent.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-xl mr-3"></i>
+                    <div>
+                        <div class="font-semibold">Conversion Error</div>
+                        <div class="text-sm opacity-90">${message}</div>
+                    </div>
+                    <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+        }
+
+        function resetForm() {
+            selectedFiles = [];
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('conversionOptions').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('outputFormat').value = '';
+
+            // Reset quality selection
+            document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.quality-option[data-quality="high"]').classList.add('selected');
+        }
+
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function loadStats() {
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('totalConversions').textContent = conversionStats.totalConversions.toLocaleString();
+            document.getElementById('activeJobs').textContent = conversionStats.activeJobs;
+        }
+        
+        async function startBatchConversion() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const selectedQuality = document.querySelector('.quality-option.selected').dataset.quality;
+
+            if (!outputFormat || selectedFiles.length === 0) return;
+
+            conversionStats.activeJobs += selectedFiles.length;
+            updateStats();
+
+            const filesToConvert = [...selectedFiles];
+            resetForm(); // Clear the UI for the next batch
+
+            for (let i = 0; i < filesToConvert.length; i++) {
+                const file = filesToConvert[i];
+                const fileType = getFileType(file.name);
+                
+                showProgressModal();
+                document.getElementById('currentFileName').textContent = file.name;
+                document.getElementById('currentFormat').textContent = `${outputFormat.toUpperCase()} (${i + 1}/${filesToConvert.length})`;
+                updateProgressDisplay({ progress: 0 });
+
+                currentConversionProcess = true;
+
+                try {
+                    const converter = new ClientMediaConverter();
+                    let convertedBlob;
+
+                    if (fileType === 'image') {
+                        // Image conversion progress is not tracked by FFmpeg, so we simulate it
+                        updateProgressDisplay({ progress: 50 });
+                        convertedBlob = await converter.convertImage(file, outputFormat, 0.9);
+                        updateProgressDisplay({ progress: 100 });
+                    } else if (fileType === 'video' || fileType === 'audio') {
+                        if (!isFFmpegLoaded) throw new Error('Video/Audio conversion engine not available');
+                        convertedBlob = await converter.convertVideoAudio(file, outputFormat, selectedQuality);
+                    } else {
+                        throw new Error('Unsupported file type');
+                    }
+
+                    const originalName = file.name.split('.').slice(0, -1).join('.');
+                    const downloadName = `${originalName}.${outputFormat}`;
+                    const downloadUrl = URL.createObjectURL(convertedBlob);
+
+                    showSuccessNotification(`${downloadName} converted!`, downloadUrl);
+                    
+                    conversionStats.totalConversions++;
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    showErrorNotification(`Failed to convert ${file.name}: ${error.message}`);
+                } finally {
+                    currentConversionProcess = null;
+                    conversionStats.activeJobs--;
+                    updateStats();
+                }
+            }
+
+            hideProgressModal();
+        }
+
+    </script>
+</body>
+</html>
